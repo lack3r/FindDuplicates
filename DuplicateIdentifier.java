@@ -1,3 +1,7 @@
+//This is incomplete and not refactored!!!!
+//Will fix it by end of Jan 2016
+//Date created 27-01-2016
+
 package InterviewCake;
 
 import java.io.File;
@@ -10,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -38,7 +41,6 @@ public class DuplicateIdentifier {
 		Path path;
 
 		LocalFile(Path path) {
-			//computeHash(path);
 			calculateSize(path);
 			this.path = path;
 			filesBySize.put(size,this);
@@ -52,6 +54,8 @@ public class DuplicateIdentifier {
 				size = -1;
 			}
 		}
+		
+		//This is not calculated by default, but only when there is another file with exactly the same size
 		private void computeHash() {
 			MessageDigest md;
 			try {
@@ -112,19 +116,7 @@ public class DuplicateIdentifier {
             }
             }
 	}
-	///private String printSize(long size){
-		/*long bytes = size;
-		long kilobytes = (bytes / 1024);
-		long megabytes = (kilobytes / 1024);
-		long gigabytes = (megabytes / 1024);
-		long terabytes = (gigabytes / 1024);
-		
-		return "bytes : " + bytes + 
-				(kilobytes>0?"KB : " + kilobytes:"")+
-				(megabytes>0?"MB : " + megabytes:"")+
-				(gigabytes>0?"GB : " + gigabytes:"")+
-				(terabytes>0?"TB : " + terabytes:"");*/
-	//}
+
 	private String beautifySize(Long size){
 		String[] sizeNames = {"B","KB","MB","GB","TB"};
 		int sizeNamesIndex=0;
@@ -152,15 +144,12 @@ public class DuplicateIdentifier {
 	public void deleteUnique(){
 		System.out.println("COMPUTING HASHES");
 		System.out.println("================");
-		int i=1;
 		for (Long filesize:filesBySize.keySet()){
 			ArrayList<LocalFile> files = filesBySize.get(filesize);
 			if (files.size()>1){
 				for (LocalFile file : files) {
 					file.computeHash();
-					//System.out.println(i+"th file "+file.path.path);
 					mappedFiles.put(file, file.path);
-					i++;
 				}
 			}
 		}
@@ -169,11 +158,8 @@ public class DuplicateIdentifier {
 	public void createFiles() {
 		System.out.println("CREATING FILES");
 		System.out.println("================");
-		int i=1;
 		for (Path path : filePaths) {
-			//System.out.println(i+"th file "+path.path);
 			new LocalFile(path);
-			i++;
 		}
 	}
 	
@@ -202,7 +188,7 @@ public class DuplicateIdentifier {
 	    
 		for (LocalFile file:filesBySize){
 			ArrayList<Path> paths = mappedFiles.get(file);
-			if (paths.size()>1){
+			if (paths.size()>1 && file.size>10000000L){
 				
 				System.out.println("FILE: MD5: "+file.hash+ " File size: "+beautifySize(file.size)+"\t");
 				printList(paths);
@@ -212,7 +198,7 @@ public class DuplicateIdentifier {
 	}
 
 	public static void main(String[] args) {
-		String directory = "some path over here";
+		String directory = "some path here";
 		DuplicateIdentifier di = new DuplicateIdentifier();
 		di.addFilePathsFromDirectory(directory);
 		di.createFiles();
